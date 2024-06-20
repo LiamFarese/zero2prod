@@ -33,8 +33,12 @@ jobs:
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
+    container:
+      image: xd009642/tarpaulin
+      options: --security-opt seccomp=unconfined
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo install cargo-tarpaulin
-      - run: cargo tarpaulin --ignore-tests
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Generate code coverage
+        run: |
+          cargo tarpaulin --verbose --workspace
