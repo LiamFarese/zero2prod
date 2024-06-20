@@ -8,9 +8,10 @@ on:
       - '**/Cargo.lock'
 jobs:
   security_audit:
+    name: Scan for vulnerabilities
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: taiki-e/install-action@cargo-deny
-      - name: Scan for vulnerabilities
-        run: cargo deny check advisories
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install cargo-deny
+      - run: cargo deny check advisories
