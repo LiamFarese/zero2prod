@@ -12,6 +12,7 @@ path = "src/main.rs"
 name = "zero2prod"
 
 [dependencies]
+config = "0.14.0"
 actix-web = "4"
 tokio = {version = "1", features = ["full"]}
 serde = { version = "1.0.203", features = ["derive"] }
