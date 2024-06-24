@@ -1,0 +1,1 @@
+An Email subscription Service in Rust

@@ -1,4 +1,5 @@
-use config;
+use std::fs::read_to_string;
+use toml;
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -31,13 +32,7 @@ impl DatabaseSettings {
     }
 }
 
-pub fn get_config() -> Result<Settings, config::ConfigError> {
-    let settings = config::Config::builder()
-        .add_source(config::File::new(
-            "configuration.yaml",
-            config::FileFormat::Yaml,
-        ))
-        .build()?;
-
-    settings.try_deserialize::<Settings>()
+pub fn get_config() -> Result<Settings, anyhow::Error> {
+    let settings: Settings = toml::from_str(&read_to_string("configuration.toml")?)?;
+    Ok(settings)
 }
