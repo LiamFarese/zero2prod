@@ -15,7 +15,7 @@ async fn main() -> Result<(), std::io::Error> {
         "{}:{}",
         settings.application.host, settings.application.port
     );
-    
+
     let listener: TcpListener = TcpListener::bind(address)?;
     let pool = PgPool::connect_lazy(settings.database.connection_string().expose_secret())
         .expect("Failed to connect to database");

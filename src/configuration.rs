@@ -85,7 +85,7 @@ pub fn get_config() -> Result<Settings, anyhow::Error> {
 
     match environment {
         Environment::Local => settings.application.host = "127.0.0.1".to_string(),
-        Environment::Production => settings.application.host = "0.0.0.0".to_string()
+        Environment::Production => settings.application.host = "0.0.0.0".to_string(),
     }
 
     Ok(settings)
