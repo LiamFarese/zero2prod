@@ -1,7 +1,6 @@
 use secrecy::{ExposeSecret, Secret};
-use std::fs::read_to_string;
-use sqlx::ConnectOptions;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
+use std::fs::read_to_string;
 use toml;
 
 #[derive(serde::Deserialize)]
@@ -87,13 +86,15 @@ pub fn get_config() -> Result<Settings, anyhow::Error> {
         Environment::Local => {
             settings.application.host = "127.0.0.1".to_string();
             settings.database.require_ssl = false;
-        },
+        }
         Environment::Production => {
             settings.database.require_ssl = true;
-            settings.database.username =  std::env::var("APP_DATABASE__USERNAME")
+            settings.database.username = std::env::var("APP_DATABASE__USERNAME")
                 .expect("Failed to parse APP_DATABASE__USERNAME");
-            settings.database.password = Secret::new(std::env::var("APP_DATABASE__PASSWORD")
-                .expect("Failed to parse APP_DATABASE__PASSWORD"));
+            settings.database.password = Secret::new(
+                std::env::var("APP_DATABASE__PASSWORD")
+                    .expect("Failed to parse APP_DATABASE__PASSWORD"),
+            );
             settings.application.host = std::env::var("APP_DATABASE__HOSTNAME")
                 .expect("Failed to parse APP_DATABASE__HOSTNAME");
             settings.application.port = std::env::var("APP_DATABASE__PORT")
@@ -102,7 +103,7 @@ pub fn get_config() -> Result<Settings, anyhow::Error> {
                 .expect("Unable to parse port into u16");
             settings.database.database_name = std::env::var("APP_DATABASE__DATABASE_NAME")
                 .expect("Failed to parse APP_DATABASE__DATABASE_NAME");
-        },
+        }
     }
 
     Ok(settings)

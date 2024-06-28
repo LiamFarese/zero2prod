@@ -1,8 +1,6 @@
 use once_cell::sync::Lazy;
-use secrecy::ExposeSecret;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
-use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 use zero2prod::configuration::{get_config, DatabaseSettings};
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
@@ -163,10 +161,9 @@ async fn spawn_app() -> TestApp {
 
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
     // Create Database
-    let mut connection =
-        PgConnection::connect_with(&config.without_db())
-            .await
-            .expect("Failed to connect to database");
+    let mut connection = PgConnection::connect_with(&config.without_db())
+        .await
+        .expect("Failed to connect to database");
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
         .await
