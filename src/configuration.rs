@@ -88,6 +88,7 @@ pub fn get_config() -> Result<Settings, anyhow::Error> {
             settings.database.require_ssl = false;
         }
         Environment::Production => {
+            settings.application.host = "0.0.0.0".to_string();
             settings.database.require_ssl = true;
             settings.database.username = std::env::var("APP_DATABASE__USERNAME")
                 .expect("Failed to parse APP_DATABASE__USERNAME");
