@@ -1,5 +1,7 @@
 use secrecy::{ExposeSecret, Secret};
 use std::fs::read_to_string;
+use sqlx::ConnectOptions;
+use sqlx::postgres::{PgConnectOptions, PgSslMode};
 use toml;
 
 #[derive(serde::Deserialize)]
@@ -21,28 +23,26 @@ pub struct DatabaseSettings {
     pub port: u16,
     pub host: String,
     pub database_name: String,
+    pub require_ssl: bool,
 }
 
 impl DatabaseSettings {
-    pub fn connection_string(&self) -> Secret<String> {
-        Secret::new(format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.username,
-            self.password.expose_secret(),
-            self.host,
-            self.port,
-            self.database_name
-        ))
+    pub fn without_db(&self) -> PgConnectOptions {
+        let ssl_mode = if self.require_ssl {
+            PgSslMode::Require
+        } else {
+            PgSslMode::Prefer
+        };
+        PgConnectOptions::new()
+            .host(&self.host)
+            .username(&self.username)
+            .password(&self.password.expose_secret())
+            .port(self.port)
+            .ssl_mode(ssl_mode)
     }
 
-    pub fn connection_string_without_db(&self) -> Secret<String> {
-        Secret::new(format!(
-            "postgres://{}:{}@{}:{}",
-            self.username,
-            self.password.expose_secret(),
-            self.host,
-            self.port
-        ))
+    pub fn with_db(&self) -> PgConnectOptions {
+        self.without_db().database(&self.database_name)
     }
 }
 
@@ -84,8 +84,25 @@ pub fn get_config() -> Result<Settings, anyhow::Error> {
     let mut settings: Settings = toml::from_str(&read_to_string("configuration.toml")?)?;
 
     match environment {
-        Environment::Local => settings.application.host = "127.0.0.1".to_string(),
-        Environment::Production => settings.application.host = "0.0.0.0".to_string(),
+        Environment::Local => {
+            settings.application.host = "127.0.0.1".to_string();
+            settings.database.require_ssl = false;
+        },
+        Environment::Production => {
+            settings.database.require_ssl = true;
+            settings.database.username =  std::env::var("APP_DATABASE__USERNAME")
+                .expect("Failed to parse APP_DATABASE__USERNAME");
+            settings.database.password = Secret::new(std::env::var("APP_DATABASE__PASSWORD")
+                .expect("Failed to parse APP_DATABASE__PASSWORD"));
+            settings.application.host = std::env::var("APP_DATABASE__HOSTNAME")
+                .expect("Failed to parse APP_DATABASE__HOSTNAME");
+            settings.application.port = std::env::var("APP_DATABASE__PORT")
+                .expect("Failed to parse APP_DATABASE__PORT")
+                .parse()
+                .expect("Unable to parse port into u16");
+            settings.database.database_name = std::env::var("APP_DATABASE__DATABASE_NAME")
+                .expect("Failed to parse APP_DATABASE__DATABASE_NAME");
+        },
     }
 
     Ok(settings)
