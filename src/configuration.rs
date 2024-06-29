@@ -96,9 +96,9 @@ pub fn get_config() -> Result<Settings, anyhow::Error> {
                 std::env::var("APP_DATABASE__PASSWORD")
                     .expect("Failed to parse APP_DATABASE__PASSWORD"),
             );
-            settings.application.host =
+            settings.database.host =
                 std::env::var("APP_DATABASE__HOST").expect("Failed to parse APP_DATABASE__HOST");
-            settings.application.port = std::env::var("APP_DATABASE__PORT")
+            settings.database.port = std::env::var("APP_DATABASE__PORT")
                 .expect("Failed to parse APP_DATABASE__PORT")
                 .parse()
                 .expect("Unable to parse port into u16");
