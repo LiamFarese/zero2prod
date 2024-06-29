@@ -1,6 +1,7 @@
 # See https://www.digitalocean.com/docs/app-platform/#regional-availability for the available options
 # You can get region slugs from https://www.digitalocean.com/docs/platform/availability-matrix/
 # `fra` stands for Frankfurt (Germany - EU)
+name: zero2prod
 region: lon
 services:
   - name: zero2prod
@@ -8,9 +9,9 @@ services:
     dockerfile_path: Dockerfile
     source_dir: .
     github:
-      branch: root-chapter-05
+      branch: main
       deploy_on_push: true
-      repo: LukeMathWalker/zero-to-production
+      repo: LiamFarese/zero2prod
     # Active probe used by DigitalOcean's to ensure our application is healthy
     health_check:
       # The path to our health check endpoint! It turned out to be useful in the end!
